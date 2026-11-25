@@ -317,3 +317,10 @@ details.assume .fields{margin-top:14px}
 .aud .brandline a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 .progress{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin:10px 0}
 .progress b{display:block;height:100%;background:var(--carpet);transition:width .2s}
+.num{position:relative;display:flex;align-items:center}
+.num input{font-variant-numeric:tabular-nums}
+.num input.has-pre{padding-left:26px}
+.num input.has-suf{padding-right:30px}
+.num .adorn{position:absolute;color:var(--muted);font-size:15px;pointer-events:none}
+.num .adorn.pre{left:12px}
+.num .adorn.suf{right:12px}
