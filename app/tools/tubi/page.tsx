@@ -7,6 +7,7 @@ import { Footer, Nav } from "@/components/Chrome";
 import { EmailDialog, type AskEmail } from "@/components/EmailDialog";
 import { Locked, PlanCard } from "@/components/PlanCard";
 import { useToast } from "@/components/Toast";
+import { NumberField, type NumberKind } from "@/components/NumberField";
 import { errorMessage, isEmail, useStudio } from "@/components/useStudio";
 import { tierForMonthlySpend } from "@/lib/plans";
 import { readLocal, STORAGE_KEYS, writeLocal } from "@/lib/storage-keys";
@@ -14,15 +15,6 @@ import { compactNumber, computeForecast, DEFAULT_INPUTS, money, type ForecastInp
 
 type NumKey = Exclude<keyof ForecastInputs, "audience">;
 
-function Field({ k, label, hint, value, onChange, step, max, min = 0 }: { k: NumKey; label: string; hint?: string; value: number; onChange: (k: NumKey, v: number) => void; step?: number; max?: number; min?: number }) {
-  return (
-    <div className="field">
-      <label htmlFor={`c_${k}`}>{label}</label>
-      <input id={`c_${k}`} type="number" inputMode="decimal" min={min} max={max} step={step} value={Number.isFinite(value) ? value : ""} onChange={(e) => { const v = parseFloat(e.target.value); onChange(k, Number.isFinite(v) && v >= 0 ? v : 0); }} />
-      {hint ? <span className="hint">{hint}</span> : null}
-    </div>
-  );
-}
 
 function Chart({ r, budget }: { r: ForecastResult; budget: number }) {
   const W = 640, H = 220, P = 34;
@@ -78,6 +70,9 @@ export default function TubiCalculator() {
   const set = (k: NumKey, v: number) => {
     setInp((p) => ({ ...p, [k]: v }));
   };
+  const F = (k: NumKey, label: string, kind: NumberKind, opts: { hint?: string; min?: number; max?: number } = {}) => (
+    <NumberField id={`c_${k}`} label={label} kind={kind} value={inp[k]} onChange={(v) => set(k, v)} {...opts} />
+  );
   const name = film || "your film";
   const tier = tierForMonthlySpend(Math.max(inp.spend, 1));
   const covered = Math.round(r.coveredPct);
@@ -133,9 +128,9 @@ export default function TubiCalculator() {
                   <label htmlFor="c_film">Film title</label>
                   <input id="c_film" maxLength={60} value={film} placeholder="e.g. Bone Hill" onChange={(e) => { setFilm(e.target.value); s.setFilm(e.target.value); }} />
                 </div>
-                <Field k="budget" label="What did the film cost to make? ($)" hint="This is your break-even line." value={inp.budget} onChange={set} />
-                <Field k="runtime" label="Runtime (minutes)" value={inp.runtime} onChange={set} min={1} max={600} />
-                <Field k="organic" label="Views per month with no promotion" hint="Most indie titles land between 500 and 5,000." value={inp.organic} onChange={set} />
+                {F("budget", "What did the film cost to make?", "money", { hint: "This is your break-even line.", max: 1e9 })}
+                {F("runtime", "Runtime (minutes)", "int", { min: 1, max: 600 })}
+                {F("organic", "Views per month with no promotion", "int", { hint: "Most indie titles land between 500 and 5,000.", max: 1e8 })}
                 <div className="field">
                   <label>Who already knows the film?</label>
                   <div className="seg" role="group" aria-label="Audience">
@@ -144,17 +139,17 @@ export default function TubiCalculator() {
                   </div>
                   <span className="hint">A warm audience (followers, an email list, festival buzz) turns ad dollars into views at a higher rate.</span>
                 </div>
-                <Field k="spend" label="Monthly ad budget ($)" hint="Set it to 0 to see the forecast with no campaign." value={inp.spend} onChange={set} />
-                <Field k="months" label="Months of ads" value={inp.months} onChange={set} max={12} />
+                {F("spend", "Monthly ad budget", "money", { hint: "Set it to 0 to see the forecast with no campaign.", max: 1e9 })}
+                {F("months", "Months of ads", "int", { max: 12 })}
               </div>
               <details className="assume">
                 <summary>Assumptions you can change</summary>
                 <div className="fields">
-                  <Field k="completion" label="Average watch-through (%)" value={inp.completion} onChange={set} min={1} max={100} />
-                  <Field k="adsPerHour" label="Ads per hour watched" hint="Roughly 12 thirty-second spots." value={inp.adsPerHour} onChange={set} />
-                  <Field k="ecpm" label="Partner revenue per 1,000 ad views ($)" hint="$4.73 from FLMLNK's Shots campaign on Tubi." value={inp.ecpm} onChange={set} step={0.01} />
-                  <Field k="roasCold" label="Return per $1 of ads, cold audience" hint="FLMLNK pilots have returned 2 to 10 times ad spend." value={inp.roasCold} onChange={set} step={0.1} />
-                  <Field k="roasWarm" label="Return per $1 of ads, warm audience" hint="Shots returned 7.3 times ($1,500 in, about $11K back)." value={inp.roasWarm} onChange={set} step={0.1} />
+                  {F("completion", "Average watch-through", "percent", { min: 1, max: 100 })}
+                  {F("adsPerHour", "Ads per hour watched", "int", { hint: "Roughly 12 thirty-second spots.", max: 60 })}
+                  {F("ecpm", "Partner revenue per 1,000 ad views", "rate", { hint: "$4.73 from FLMLNK's Shots campaign on Tubi.", max: 200 })}
+                  {F("roasCold", "Return per $1 of ads, cold audience", "multiplier", { hint: "FLMLNK pilots have returned 2 to 10 times ad spend.", max: 50 })}
+                  {F("roasWarm", "Return per $1 of ads, warm audience", "multiplier", { hint: "Shots returned 7.3 times ($1,500 in, about $11K back).", max: 50 })}
                 </div>
               </details>
 
