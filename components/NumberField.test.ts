@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { cleanInput, formatNumber } from "./NumberField";
+import { cleanInput, formatNumber, groupDigits } from "./NumberField";
 
 describe("cleanInput", () => {
   test("keeps one decimal point while typing", () => {
@@ -31,5 +31,21 @@ describe("formatNumber", () => {
     expect(formatNumber(2.5, "multiplier")).toBe("2.5");
     expect(formatNumber(7.25, "multiplier")).toBe("7.25");
     expect(formatNumber(55, "percent")).toBe("55");
+  });
+});
+
+describe("groupDigits", () => {
+  test("adds commas as the number grows", () => {
+    expect(["5", "50", "500", "5000", "50000", "500000", "5000000"].map(groupDigits)).toEqual(["5", "50", "500", "5,000", "50,000", "500,000", "5,000,000"]);
+  });
+  test("leaves the decimal part alone and keeps a trailing point", () => {
+    expect(groupDigits("125000.")).toBe("125,000.");
+    expect(groupDigits("125000.5")).toBe("125,000.5");
+    expect(groupDigits("1234.56")).toBe("1,234.56");
+    expect(groupDigits("0.5")).toBe("0.5");
+  });
+  test("drops leading zeros", () => {
+    expect(groupDigits("0050000")).toBe("50,000");
+    expect(groupDigits("")).toBe("");
   });
 });

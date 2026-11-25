@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export type NumberKind = "money" | "rate" | "int" | "percent" | "multiplier";
 
@@ -29,6 +29,22 @@ export function cleanInput(raw: string, decimals: number): string {
   return s;
 }
 
+export function groupDigits(clean: string): string {
+  const [int, frac] = clean.split(".");
+  const grouped = int.replace(/^0+(?=\d)/, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return frac === undefined ? grouped : `${grouped || "0"}.${frac}`;
+}
+
+function caretAfterChars(text: string, count: number): number {
+  if (count <= 0) return 0;
+  let seen = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (/[\d.]/.test(text[i])) seen++;
+    if (seen === count) return i + 1;
+  }
+  return text.length;
+}
+
 export function NumberField({
   id,
   label,
@@ -53,6 +69,15 @@ export function NumberField({
   const toValue = (n: number) => (spec.decimals === 0 ? Math.trunc(n) : Number(n.toFixed(spec.decimals)));
   const [text, setText] = useState(() => formatNumber(value, kind));
   const focused = useRef(false);
+  const input = useRef<HTMLInputElement>(null);
+  const pendingCaret = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    if (pendingCaret.current === null || !input.current) return;
+    const pos = caretAfterChars(text, pendingCaret.current);
+    input.current.setSelectionRange(pos, pos);
+    pendingCaret.current = null;
+  }, [text]);
 
   useEffect(() => {
     if (!focused.current) setText(formatNumber(value, kind));
@@ -67,6 +92,7 @@ export function NumberField({
       <div className="num">
         {spec.prefix ? <span className="adorn pre" aria-hidden="true">{spec.prefix}</span> : null}
         <input
+          ref={input}
           id={id}
           type="text"
           inputMode={spec.decimals ? "decimal" : "numeric"}
@@ -76,30 +102,40 @@ export function NumberField({
           className={`${spec.prefix ? "has-pre" : ""} ${spec.suffix ? "has-suf" : ""}`}
           onFocus={(e) => {
             focused.current = true;
-            setText(cleanInput(e.target.value, spec.decimals));
+            setText(groupDigits(cleanInput(e.target.value, typingDecimals)));
           }}
           onChange={(e) => {
-            const t = cleanInput(e.target.value, typingDecimals);
-            setText(t);
+            const raw = e.target.value;
+            const caret = e.target.selectionStart ?? raw.length;
+            const t = cleanInput(raw, typingDecimals);
+            const before = cleanInput(raw.slice(0, caret), typingDecimals).length;
+            pendingCaret.current = Math.min(before, t.length);
+            setText(groupDigits(t));
             const n = parseFloat(t);
             if (Number.isFinite(n)) onChange(toValue(Math.min(max ?? Infinity, n)));
             else if (t === "") onChange(min);
           }}
           onBlur={() => {
             focused.current = false;
-            const n = parseFloat(text);
+            const n = parseFloat(cleanInput(text, typingDecimals));
             const v = clamp(Number.isFinite(n) ? n : min);
             commit(v);
             setText(formatNumber(toValue(v), kind));
           }}
           onKeyDown={(e) => {
+            const el = e.currentTarget;
+            const at = el.selectionStart ?? 0;
+            if (at === el.selectionEnd) {
+              if (e.key === "Backspace" && el.value[at - 1] === ",") el.setSelectionRange(at - 1, at - 1);
+              if (e.key === "Delete" && el.value[at] === ",") el.setSelectionRange(at + 1, at + 1);
+            }
             if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
             e.preventDefault();
-            const cur = parseFloat(text) || 0;
+            const cur = parseFloat(cleanInput(text, typingDecimals)) || 0;
             const big = e.shiftKey ? 10 : 1;
             const next = clamp(cur + (e.key === "ArrowUp" ? 1 : -1) * spec.step * big);
             const fixed = toValue(next);
-            setText(String(fixed));
+            setText(groupDigits(String(fixed)));
             commit(fixed);
           }}
         />
