@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLMLNK Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#060708; --surface:#111318; --surface-2:#1a1d24; --tile:#16181e; --line:#24272f;
+  --text:#f4f4f2; --muted:#9a9ea8; --dim:#696d78;
+  --red:#C41E3A; --carpet:#d5111c; --gold:#D4AF37; --bulb:#ffd98a;
+  --serif:"DM Serif Display",Georgia,serif; --sans:Inter,system-ui,-apple-system,sans-serif; --grot:"Space Grotesk",Inter,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{font-family:var(--sans);color:var(--text);font-feature-settings:"ss01","ss02","cv01";background:var(--canvas);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--carpet);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1360px;margin:0 auto;padding:0 16px}
+@media(min-width:900px){.wrap{padding:0 24px}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;border:1px solid transparent;transition:background .15s,border-color .15s;white-space:nowrap}
+.btn-red{background:var(--carpet);color:#fff}.btn-red:hover{background:#b50e18}
+.btn-ghost{background:rgba(255,255,255,.04);border-color:var(--line)}.btn-ghost:hover{background:rgba(255,255,255,.08)}
+.btn-white{background:#fff;color:#0a0a0a}.btn-white:hover{background:#e9e9e9}
+.btn-sm{padding:7px 12px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.badge{font-family:var(--grot);font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:6px;line-height:1.5}
+.badge.new{background:var(--carpet);color:#fff}
+.badge.free{background:var(--gold);color:#1a1405}
+.badge.soon{background:#2a2d35;color:#c3c6cd}
+.badge.ext{background:#fff;color:#111}
+
+/* nav */
+nav.top{position:sticky;top:0;z-index:30;background:rgba(6,7,8,.86);backdrop-filter:blur(14px)}
+nav.top .wrap{display:flex;align-items:center;gap:10px;height:60px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--carpet);display:grid;place-items:center;flex:none}
+.logo svg{width:20px;height:20px}
+.drops{display:flex;align-items:center;gap:8px;border:1px solid #34373f;background:#15171c;border-radius:10px;padding:6px 8px 6px 12px;font-size:14px;font-weight:600}
+.drops b{font-family:var(--grot);background:var(--carpet);color:#fff;border-radius:6px;padding:0 7px;font-size:12px;line-height:20px}
+.navlinks{display:none;gap:2px;margin-left:8px}
+@media(min-width:980px){.navlinks{display:flex}}
+.navlinks a{font-size:14px;font-weight:500;color:var(--muted);padding:8px 10px;border-radius:8px}
+.navlinks a:hover,.navlinks a.on{color:var(--text)}
+nav .spacer{flex:1}
+.film-chip{display:none;align-items:center;gap:8px;background:#15171c;border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:500;max-width:200px}
+.film-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(min-width:700px){.film-chip.on{display:flex}}
+.film-chip i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--carpet);box-shadow:0 0 8px var(--carpet)}
+.plans-pill{position:relative;display:none}
+@media(min-width:560px){.plans-pill{display:inline-flex}}
+.plans-pill .badge{position:absolute;right:-6px;bottom:-9px}
+
+/* feature carousel */
+.feat{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(280px,1fr);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 0 4px;scrollbar-width:none}
+.feat::-webkit-scrollbar{display:none}
+@media(min-width:900px){.feat{grid-auto-columns:calc((100% - 28px)/2.4)}}
+@media(min-width:1200px){.feat{grid-auto-columns:calc((100% - 28px)/3)}}
+.fcard{scroll-snap-align:start;align-self:start;color:inherit;text-align:left;background:none;border:0;padding:0;display:block}
+.fcard .media{aspect-ratio:16/9;border-radius:14px;overflow:hidden;position:relative;background:#0d0e12;border:1px solid #1d2027}
+.fcard .media svg{position:absolute;inset:0;width:100%;height:100%}
+.fcard:hover .media{border-color:#3a3d47}
+.fcard h3{font-family:var(--grot);font-weight:700;font-size:15px;letter-spacing:.01em;text-transform:uppercase;margin-top:12px}
+.fcard p{font-size:13px;color:var(--muted);margin-top:2px}
+.feat-nav{display:flex;gap:6px;justify-content:flex-end;margin-top:-4px}
+.feat-nav button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#111318;display:grid;place-items:center}
+
+/* promo + quick tiles */
+.duo{display:grid;gap:14px;margin-top:32px}
+@media(min-width:1000px){.duo{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr)}}
+.marquee{position:relative;border-radius:16px;overflow:hidden;background:radial-gradient(120% 90% at 70% 110%,rgba(213,17,28,.45),transparent 60%),linear-gradient(180deg,#1a0507,#0b0304);border:1px solid #3a1218;padding:22px;min-height:300px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 0 60px rgba(213,17,28,.12)}
+.bulbs{position:absolute;inset:8px;border-radius:12px;pointer-events:none}
+.bulbs i{position:absolute;width:6px;height:6px;border-radius:50%;background:#3a2a12;transform:translate(-50%,-50%);transition:background .25s,box-shadow .25s}
+.bulbs i.lit{background:var(--bulb);box-shadow:0 0 6px 1px rgba(255,217,138,.8),0 0 14px rgba(255,190,90,.35)}
+.marquee .kicker{font-family:var(--grot);font-weight:700;font-size:13px;color:#e9c98c;text-transform:uppercase;letter-spacing:.06em;position:relative}
+.marquee-title{position:relative;font-family:var(--serif);font-size:clamp(34px,4.4vw,56px);line-height:1.02;color:#fff6e6;text-shadow:0 0 24px rgba(255,200,120,.35);word-break:break-word;margin:10px 0}
+.marquee-title.empty{color:rgba(255,246,230,.4);text-shadow:none}
+.film-form{position:relative;display:flex;gap:8px;flex-wrap:wrap}
+.film-form input{flex:1;min-width:180px;background:rgba(0,0,0,.45);border:1px solid #4a1d24;border-radius:10px;padding:11px 14px;font-size:16px}
+.film-form input:focus{border-color:var(--carpet);outline:none}
+.marquee small{position:relative;display:block;color:#c8a98a;font-size:12.5px;margin-top:8px}
+.quick{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:640px){.quick{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.qt{position:relative;text-align:left;background:var(--tile);border:1px solid #23262e;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;min-height:142px;transition:background .15s,border-color .15s}
+.qt:hover{background:#1d2027;border-color:#33363f}
+.qt .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:auto}
+.qt .ic{width:22px;height:22px;color:#e7e7e7}
+.qt h3{font-size:15px;font-weight:600;margin-top:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qt p{font-size:12.5px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* exclusive panel */
+.excl{margin-top:32px;border-radius:18px;border:1px solid #23262e;overflow:hidden;position:relative;padding:56px 20px 28px;text-align:center;background:radial-gradient(60% 80% at 50% 120%,rgba(213,17,28,.35),transparent 70%),radial-gradient(circle at 50% 0%,#15161b,#07080a 70%)}
+.excl .stars{position:absolute;inset:0;opacity:.55;pointer-events:none}
+.excl .chip{position:relative;display:inline-block;font-family:var(--grot);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:var(--carpet);color:#fff;padding:3px 10px;border-radius:6px;transform:skew(-8deg)}
+.excl h2{position:relative;font-family:var(--serif);font-weight:400;font-size:clamp(34px,5vw,60px);line-height:1.05;margin-top:16px}
+.excl h2 span{display:block;color:#bdbfc6}
+.excl p{position:relative;color:var(--muted);max-width:52ch;margin:14px auto 0;font-size:15.5px}
+.excl .acts{position:relative;display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.proof{position:relative;display:grid;gap:10px;margin:36px auto 0;max-width:980px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:800px){.proof{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.proof div{background:rgba(255,255,255,.035);border:1px solid #23262e;border-radius:12px;padding:14px;text-align:left}
+.proof b{font-family:var(--serif);font-weight:400;font-size:30px;display:block;line-height:1.1}
+.proof span{font-size:12.5px;color:var(--muted)}
+.excl .src{position:relative;font-size:12px;color:var(--dim);margin-top:12px}
+
+/* demand file */
+.demand{margin-top:32px;border:1px solid #23262e;border-radius:16px;background:var(--surface);padding:18px 20px;display:grid;gap:14px}
+@media(min-width:900px){.demand{grid-template-columns:280px 1fr;align-items:center}}
+.demand h2{font-family:var(--serif);font-weight:400;font-size:24px}
+.demand p{color:var(--muted);font-size:13px}
+.meter{height:4px;border-radius:4px;background:var(--line);margin-top:10px;overflow:hidden}
+.meter b{display:block;height:100%;background:var(--carpet);width:0;transition:width .5s}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--muted);display:flex;gap:8px;align-items:center;background:transparent}
+.chip.done{color:var(--text);border-color:rgba(213,17,28,.5);background:rgba(213,17,28,.08)}
+.chip.done::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--carpet)}
+.chip.locked{opacity:.75}
+.chip svg{width:12px;height:12px}
+
+/* explore by stage */
+.sect{margin-top:44px}
+.sect-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sect-head h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,3.4vw,38px);line-height:1.1}
+.sect-head p{color:var(--muted);font-size:14px;margin-top:4px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-top:16px;padding-bottom:4px;scrollbar-width:none}
+.tabs button{flex:none;border:1px solid var(--line);background:#111318;color:var(--muted);border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:500}
+.tabs button[aria-pressed=true]{background:#fff;color:#0a0a0a;border-color:#fff}
+.grid{display:grid;gap:12px;margin-top:16px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.gcard{position:relative;border-radius:14px;overflow:hidden;background:var(--tile);border:1px solid #23262e;display:flex;flex-direction:column;text-align:left}
+.gcard .art{height:150px;display:grid;place-items:center;padding:22px 18%;background:radial-gradient(90% 90% at 50% 0%,#2a0b10,#101216 75%);border-bottom:1px solid #1f2229}
+.gcard .art svg{width:100%;height:100%}
+.gcard .info{padding:14px;display:flex;flex-direction:column;gap:5px;flex:1}
+.gcard .info .row1{display:flex;gap:8px;align-items:center}
+.gcard .stage{font-size:12px;color:var(--muted)}
+.gcard h3{font-size:16px;font-weight:600}
+.gcard p{font-size:13px;color:#b0b3bb;line-height:1.45}
+.gcard .cta{margin-top:auto;align-self:flex-start;position:relative;z-index:2}
+.gcard .info p{margin-bottom:10px}
+.gcard button.cover{position:absolute;inset:0;background:transparent;border:0;z-index:1}
+.gcard:hover{border-color:#3a3d47}
+
+/* pricing */
+.pricing{margin:48px 0 40px}
+.pricing h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,3.4vw,38px);line-height:1.1}
+.pricing > p{color:var(--muted);margin-top:6px;max-width:60ch;font-size:14.5px}
+.tiers{display:grid;gap:10px;margin-top:20px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.tiers .t{border:1px solid #23262e;border-radius:14px;padding:16px;background:var(--tile)}
+.tiers .t.rec{border-color:rgba(213,17,28,.7);box-shadow:0 0 0 1px rgba(213,17,28,.3)}
+.tiers .t b{font-weight:600}
+.tiers .t .p{font-family:var(--serif);font-size:30px;margin:6px 0}
+.tiers .t .p small{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.tiers .t ul{list-style:none;font-size:13px;color:var(--muted);display:grid;gap:4px}
+
+/* footer */
+footer{border-top:1px solid #1b1d23;padding:40px 0 48px;color:var(--dim);font-size:13px;margin-top:24px}
+.fcols{display:grid;gap:24px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:800px){.fcols{grid-template-columns:1.4fr repeat(3,minmax(0,1fr))}}
+.fcols h4{color:var(--text);font-size:14px;font-weight:600;margin-bottom:10px}
+.fcols ul{list-style:none;display:grid;gap:7px}
+.fcols a,.fcols button{color:var(--muted);background:none;border:0;padding:0;font-size:13.5px;text-align:left}
+.fcols a:hover,.fcols button:hover{color:var(--text)}
+.fbrand p{color:var(--muted);font-size:13.5px;max-width:34ch;margin-top:10px}
+.legal{margin-top:32px;padding-top:18px;border-top:1px solid #1b1d23;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* workspace overlay */
+.ws{position:fixed;inset:0;z-index:50;background:rgba(5,6,8,.72);backdrop-filter:blur(6px);display:none;align-items:stretch;justify-content:center;padding:0}
+.ws.open{display:flex}
+@media(min-width:900px){.ws{padding:28px}}
+.ws-panel{width:100%;max-width:1180px;background:var(--canvas);border:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;animation:rise .22s ease-out}
+@media(min-width:900px){.ws-panel{border-radius:14px}}
+@keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.ws-head{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.ws-head h2{font-family:var(--serif);font-weight:400;font-size:24px;flex:1}
+.ws-body{flex:1;overflow:auto;display:grid}
+@media(min-width:960px){.ws-body{grid-template-columns:1fr 360px}}
+.ws-main{padding:24px 20px 40px}
+@media(min-width:768px){.ws-main{padding:28px 32px 48px}}
+.ws-side{border-top:1px solid var(--line);padding:24px 20px;background:linear-gradient(180deg,rgba(213,17,28,.06),transparent 40%),var(--surface)}
+@media(min-width:960px){.ws-side{border-top:0;border-left:1px solid var(--line)}}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:transparent;display:grid;place-items:center}
+.icon-btn:hover{background:rgba(255,255,255,.04)}
+
+.fields{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:620px){.fields{grid-template-columns:1fr 1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:13px;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:15px;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--carpet);outline:none}
+.field .hint{font-size:12px;color:var(--dim)}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{flex:1;background:transparent;border:0;padding:10px;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--surface-2);color:var(--text);box-shadow:inset 0 -2px 0 var(--carpet)}
+details.assume{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:rgba(255,255,255,.015)}
+details.assume summary{cursor:pointer;font-size:14px;color:var(--muted)}
+details.assume .fields{margin-top:14px}
+
+.results{margin-top:28px;display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:620px){.results{grid-template-columns:repeat(3,1fr)}}
+.stat{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--surface)}
+.stat .k{font-size:13px;color:var(--muted)}
+.stat .v{font-family:var(--serif);font-size:32px;line-height:1.1;margin-top:4px}
+.stat .s{font-size:12.5px;color:var(--dim);margin-top:4px}
+.stat.bad .v{color:#ff8f97}
+.stat.good .v{color:#9fe0b4}
+.verdict{margin-top:16px;font-size:15px;color:var(--text);max-width:68ch}
+.verdict em{font-style:normal;color:#ffb3b8}
+
+.gate{margin-top:26px;border:1px dashed #3a2328;border-radius:12px;padding:20px;position:relative;background:rgba(213,17,28,.04)}
+.gate h3{font-family:var(--serif);font-weight:400;font-size:22px}
+.gate p{color:var(--muted);font-size:14px;margin-top:4px;max-width:60ch}
+.gate form{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.gate input{flex:1;min-width:220px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.gate .fine{font-size:12px;color:var(--dim);margin-top:8px}
+.blurred{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
+
+.chart{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--surface)}
+.chart h4{font-size:14px;font-weight:500;margin-bottom:10px}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:10px;height:3px;margin-right:6px;vertical-align:middle;background:var(--c)}
+.plan{margin-top:16px;display:grid;gap:10px}
+.plan .step{display:grid;grid-template-columns:28px 1fr;gap:10px;font-size:14px}
+.plan .step b{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);font-weight:500;font-size:13px}
+.plan .step span{color:var(--muted)}
+.plan .step strong{color:var(--text);font-weight:500}
+
+/* side upsell */
+.side h3{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.2}
+.side p{color:var(--muted);font-size:14px;margin-top:8px}
+.tier{margin-top:16px;border:1px solid rgba(213,17,28,.45);border-radius:12px;padding:16px;background:rgba(11,13,16,.6)}
+.tier .name{display:flex;justify-content:space-between;align-items:baseline}
+.tier .name b{font-size:16px;font-weight:600}
+.tier .name span{font-family:var(--serif);font-size:24px}
+.tier ul{list-style:none;margin:12px 0 14px;display:grid;gap:7px;font-size:13.5px;color:var(--muted)}
+.tier li{padding-left:18px;position:relative}
+.tier li::before{content:"";position:absolute;left:2px;top:8px;width:8px;height:2px;background:var(--carpet)}
+.tier .btn{width:100%}
+.locked-list{margin-top:18px;display:grid;gap:8px}
+.locked-item{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--muted)}
+.locked-item svg{flex:none;margin-top:2px;width:14px;height:14px;color:var(--gold)}
+.locked-item b{color:var(--text);font-weight:500;display:block}
+
+/* reaction capture */
+.cap-grid{display:grid;gap:28px}
+@media(min-width:1100px){.cap-grid{grid-template-columns:1fr 280px}}
+.phone{width:260px;max-width:100%;aspect-ratio:9/19;border-radius:34px;border:8px solid #1c1f27;background:#000;position:relative;overflow:hidden;margin:0 auto;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.phone .scr{position:absolute;inset:0;display:flex;flex-direction:column;padding:28px 16px 18px;background:radial-gradient(circle at 50% 0%,rgba(213,17,28,.25),transparent 55%),#07080a}
+.phone .scr h5{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.1;margin-top:8px}
+.phone .scr .q{font-size:13px;color:#cfd2d8;margin-top:10px}
+.phone .cam{flex:1;margin:14px 0;border-radius:14px;background:#111419;border:1px solid #22262f;overflow:hidden;position:relative;display:grid;place-items:center;color:var(--dim);font-size:12px;text-align:center;padding:10px}
+.phone video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.phone .rec{position:absolute;top:8px;left:8px;font-size:11px;background:rgba(0,0,0,.6);padding:3px 8px;border-radius:999px;display:none;align-items:center;gap:6px}
+.phone .rec.on{display:flex}
+.phone .rec i{width:7px;height:7px;border-radius:50%;background:var(--carpet);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.phone .consent{font-size:11px;color:#a7abb4;display:flex;gap:6px;align-items:flex-start;margin-bottom:10px}
+.phone .consent input{margin-top:2px;accent-color:var(--carpet)}
+.phone .brandline{font-size:10.5px;color:#6b7180;text-align:center;margin-top:8px}
+.qr-card{display:grid;gap:18px;margin-top:24px;border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--surface)}
+@media(min-width:620px){.qr-card{grid-template-columns:180px 1fr;align-items:center}}
+.qr-box{background:#fff;border-radius:10px;padding:10px;width:180px;height:180px;display:grid;place-items:center}
+.qr-box img,.qr-box canvas{width:100%;height:auto;image-rendering:pixelated}
+.qr-box:fullscreen{width:100vw;height:100vh;border-radius:0;padding:6vh}.qr-box:fullscreen canvas{width:auto;height:100%}
+.qr-card h4{font-family:var(--serif);font-weight:400;font-size:22px}
+.qr-card p{color:var(--muted);font-size:14px;margin-top:4px}
+.qr-card .acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.wall{margin-top:26px}
+.wall-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.wall-head h4{font-size:15px;font-weight:600}
+.wall-head span{font-size:13px;color:var(--muted)}
+.cap-bar{height:4px;border-radius:4px;background:var(--line);margin:8px 0 14px;overflow:hidden}
+.cap-bar b{display:block;height:100%;background:var(--carpet);width:0;transition:width .4s}
+.reacts{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.react{aspect-ratio:9/14;border-radius:10px;background:#111419;border:1px solid var(--line);overflow:hidden;position:relative}
+.react video{width:100%;height:100%;object-fit:cover}
+.react .who{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 7px;font-size:11.5px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.react.empty{display:grid;place-items:center;color:var(--dim);font-size:12px;border-style:dashed;text-align:center;padding:10px}
+
+/* admin */
+.adm table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+.adm th,.adm td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+.adm th{color:var(--muted);font-weight:500}
+.adm .heat{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid var(--line)}
+.adm .heat.hot{border-color:rgba(213,17,28,.6);color:#ffb3b8}
+.adm .heat.warm{border-color:rgba(212,175,55,.5);color:#e8d28d}
+.adm h3{font-family:var(--serif);font-weight:400;font-size:22px;margin-top:26px}
+.adm h3:first-child{margin-top:0}
+.adm .note{color:var(--muted);font-size:13.5px;margin-top:4px;max-width:70ch}
+.bars{display:grid;gap:8px;margin-top:12px}
+.bars div{display:grid;grid-template-columns:180px 1fr 36px;gap:10px;align-items:center;font-size:13.5px}
+.bars i{display:block;height:8px;border-radius:4px;background:var(--carpet)}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#1b1f2a;border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;z-index:80;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<nav class="top"><div class="wrap">
+  <a href="#top" class="logo" aria-label="FLMLNK Studio home"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M7 19V5h10M7 12h7"/><circle cx="18" cy="17" r="2.2" fill="#fff" stroke="none"/></svg></a>
+  <button type="button" class="drops" id="dropsBtn">New tools <b>2</b></button>
+  <div class="navlinks">
+    <a href="#top" class="on">Home</a><a href="#explore" data-tabjump="Capture">Capture</a><a href="#explore" data-tabjump="Convert">Convert</a><a href="#explore" data-tabjump="Share">Share</a><a href="#exclusive">Campaigns</a><a href="#explore" data-tabjump="all">All tools</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="film-chip" id="filmChip" title="Your film"><i></i><span id="filmChipName"></span></div>
+  <a class="btn btn-ghost btn-sm plans-pill" href="#pricing">Plans<span class="badge free">FREE</span></a>
+  <a class="btn btn-red btn-sm" href="#marqueeBox">Get started</a>
+</div></nav>
+
+<main class="wrap" id="top">
+  <div class="feat" id="feat" aria-label="Featured tools"></div>
+  <div class="feat-nav"><button type="button" id="featPrev" aria-label="Previous"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3L5 8l5 5"/></svg></button><button type="button" id="featNext" aria-label="Next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3l5 5-5 5"/></svg></button></div>
+
+  <section class="duo" aria-label="Start with your film">
+    <div class="marquee" id="marqueeBox">
+      <div class="bulbs" id="bulbs" aria-hidden="true"></div>
+      <div>
+        <div class="kicker">Now showing</div>
+        <div class="marquee-title empty" id="marqueeTitle">Your film</div>
+      </div>
+      <div>
+        <form class="film-form" id="filmForm" autocomplete="off">
+          <label class="sr" for="filmInput">What's your film called?</label>
+          <input id="filmInput" maxlength="60" placeholder="What's your film called?" required>
+          <button class="btn btn-red" type="submit">Put it on the marquee</button>
+        </form>
+        <small>Free tools for independent filmmakers. Enter your title once and every tool uses it.</small>
+      </div>
+    </div>
+    <div class="quick" id="quick"></div>
+  </section>
+
+  <section class="excl" id="exclusive" aria-labelledby="exclH">
+    <svg class="stars" aria-hidden="true" id="stars"></svg>
+    <span class="chip">FLMLNK exclusive</span>
+    <h2 id="exclH">The tools are free.<span>The campaigns close the gap.</span></h2>
+    <p>When a tool shows your film is short of break-even, FLMLNK builds the campaign from your trailer and audience reactions, runs it, and reports the lift in Tubi views.</p>
+    <div class="acts"><button class="btn btn-white" type="button" data-open="tubi">Forecast my film</button><a class="btn btn-ghost" href="#pricing">See plans</a></div>
+    <div class="proof">
+      <div><b>7.3x</b><span>Return on ad spend, Shots campaign on Tubi</span></div>
+      <div><b>~$11K</b><span>Back from $1,500 in ads on Shots</span></div>
+      <div><b>2–10x</b><span>Return range across FLMLNK pilot campaigns</span></div>
+      <div><b>$0</b><span>Cost to use every Studio tool</span></div>
+    </div>
+  </section>
+
+  <section class="demand" aria-labelledby="demandH">
+    <div>
+      <h2 id="demandH">Your film's demand file</h2>
+      <p id="demandSub">Each tool adds proof that people want to watch your film. That proof is what distributors buy.</p>
+      <div class="meter"><b id="demandMeter"></b></div>
+    </div>
+    <div class="chips" id="demandChips"></div>
+  </section>
+
+  <section class="sect" id="explore" aria-labelledby="exploreH">
+    <div class="sect-head"><div><h2 id="exploreH">Every tool, by what it does for your film</h2><p>From the first screening to the distributor meeting.</p></div></div>
+    <div class="tabs" id="tabs" role="group" aria-label="Filter tools by stage"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="pricing" id="pricing" aria-labelledby="pricingH">
+    <h2 id="pricingH">Every plan includes every tool</h2>
+    <p>Plans add the campaigns: ads built from your film's assets, run by FLMLNK, with reporting you can show a distributor.</p>
+    <div class="tiers" id="tiers"></div>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <div class="fcols">
+    <div class="fbrand"><div style="display:flex;align-items:center;gap:10px"><span class="logo" style="width:28px;height:28px;border-radius:7px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" style="width:16px;height:16px"><path d="M7 19V5h10M7 12h7"/><circle cx="18" cy="17" r="2.2" fill="#fff" stroke="none"/></svg></span><b style="color:var(--text);font-size:15px">FLMLNK Studio</b></div><p>Free marketing tools for independent film, from the demand intelligence platform for indie distribution.</p></div>
+    <div><h4>Tools</h4><ul><li><button type="button" data-open="capture">Festival reaction capture</button></li><li><button type="button" data-open="tubi">Tubi revenue calculator</button></li><li><a href="https://showlnk.com" target="_blank" rel="noopener">Event reels</a></li><li><a href="https://www.flmlnk.com" target="_blank" rel="noopener">Film page</a></li></ul></div>
+    <div><h4>Campaigns</h4><ul><li><a href="#exclusive">How campaigns work</a></li><li><a href="#pricing">Plans</a></li><li><a href="https://www.flmlnk.com" target="_blank" rel="noopener">For distributors</a></li></ul></div>
+    <div><h4>Company</h4><ul><li><a href="https://www.flmlnk.com" target="_blank" rel="noopener">FLMLNK</a></li><li><button type="button" id="adminBtn">Demand dashboard (internal)</button></li></ul></div>
+  </div>
+  <div class="legal"><span>© 2026 FLMLNK, an ALNKRA Holdings company. Prototype.</span><span>Metro Detroit</span></div>
+</div></footer>
+
+
+<div class="ws" id="ws" role="dialog" aria-modal="true" aria-labelledby="wsTitle">
+  <div class="ws-panel">
+    <div class="ws-head">
+      <h2 id="wsTitle"></h2>
+      <button class="icon-btn" id="wsClose" aria-label="Close tool"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+    </div>
+    <div class="ws-body"><div class="ws-main" id="wsMain"></div><aside class="ws-side side" id="wsSide"></aside></div>
+  </div>
+</div>
+<div class="ws" id="askDlg" role="dialog" aria-modal="true" aria-labelledby="askTitle" style="z-index:70;align-items:center;padding:20px"><div class="ws-panel" style="max-width:440px;padding:22px;border-radius:14px"><h2 id="askTitle" style="font-family:var(--serif);font-weight:400;font-size:24px"></h2><p id="askBody" style="color:var(--muted);font-size:14px;margin-top:6px"></p><form id="askForm" style="display:flex;flex-direction:column;gap:10px;margin-top:16px"><label class="sr" for="askEmail">Email</label><input id="askEmail" type="email" required placeholder="you@yourfilm.com" style="background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:16px"><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-ghost" id="askCancel">Cancel</button><button type="submit" class="btn btn-red" id="askOk"></button></div></form></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1})},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});</script>
+<script>
+(function(){
+"use strict";
+var KEY="flmlnk_studio_v1";
+var state={film:"",email:"",leads:[],waitlist:{},done:{},events:[],tier:null};
+try{var saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved&&typeof saved==="object"){for(var k in saved)state[k]=saved[k];}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function $(s,r){return (r||document).querySelector(s)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function money(n){var a=Math.abs(n);var s=a>=1e6?(a/1e6).toFixed(a>=1e7?0:1)+"M":a>=1e4?Math.round(a/1e3)+"K":Math.round(a).toLocaleString();return (n<0?"−$":"$")+s}
+function num(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e4?Math.round(n/1e3)+"K":Math.round(n).toLocaleString()}
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove("on")},2400)}
+function filmName(){return state.film||"your film"}
+function track(type,data){state.events.push({type:type,at:Date.now(),film:state.film,data:data||{}});save()}
+
+var TIERS=[
+ {id:"free",name:"Free",price:0,cap:100,take:20,blurb:"All Studio tools, up to $100/mo in ads"},
+ {id:"starter",name:"Starter",price:99,cap:500,take:18,blurb:"Reaction reels and your first campaign"},
+ {id:"growth",name:"Growth",price:297,cap:2500,take:15,blurb:"Ongoing campaigns across Tubi and social"},
+ {id:"pro",name:"Pro",price:597,cap:7500,take:12,blurb:"Multi-title campaigns and distributor reporting"},
+ {id:"managed",name:"Managed",price:1500,cap:Infinity,take:15,blurb:"Our team runs everything, no ad cap"}
+];
+function tierForSpend(m){for(var i=0;i<TIERS.length;i++){if(m<=TIERS[i].cap)return TIERS[i]}return TIERS[4]}
+
+var DEMAND=[
+ {id:"forecast",label:"Revenue forecast",tool:"tubi"},
+ {id:"reactions",label:"Audience reactions",tool:"capture"},
+ {id:"comps",label:"Comparable titles",tool:"comps"},
+ {id:"sentiment",label:"Audience sentiment",tool:"sentiment"},
+ {id:"campaign",label:"Campaign proof (ROAS)",tool:null,paid:true},
+ {id:"distributor",label:"Distributor-ready report",tool:null,paid:true}
+];
+
+var ICON={
+ calc:'<svg viewBox="0 0 120 80" fill="none"><path d="M6 70 L30 58 L50 62 L72 40 L94 30 L114 10" stroke="#d5111c" stroke-width="2.5"/><path d="M6 46 H114" stroke="#D4AF37" stroke-dasharray="4 4" stroke-width="1.5"/><circle cx="114" cy="10" r="4" fill="#d5111c"/></svg>',
+ cap:'<svg viewBox="0 0 120 80" fill="none"><rect x="44" y="6" width="32" height="64" rx="6" stroke="#9aa0ac" stroke-width="2"/><circle cx="60" cy="32" r="9" stroke="#f4f4f2" stroke-width="2"/><path d="M48 54c3-7 21-7 24 0" stroke="#f4f4f2" stroke-width="2"/><circle cx="50" cy="13" r="2.5" fill="#d5111c"/><rect x="8" y="18" width="24" height="24" stroke="#D4AF37" stroke-width="2"/><rect x="14" y="24" width="5" height="5" fill="#D4AF37"/><rect x="22" y="31" width="4" height="4" fill="#D4AF37"/><path d="M34 30h8" stroke="#D4AF37" stroke-width="2"/></svg>',
+ page:'<svg viewBox="0 0 120 80" fill="none"><rect x="36" y="8" width="48" height="64" rx="6" stroke="#9aa0ac" stroke-width="2"/><rect x="42" y="16" width="36" height="20" rx="2" fill="#2a0a0e"/><path d="M42 44h36M42 52h28M42 60h20" stroke="#6b7180" stroke-width="2"/></svg>',
+ comps:'<svg viewBox="0 0 120 80" fill="none"><rect x="10" y="20" width="26" height="40" rx="3" stroke="#6b7180" stroke-width="2"/><rect x="47" y="14" width="26" height="52" rx="3" stroke="#d5111c" stroke-width="2"/><rect x="84" y="20" width="26" height="40" rx="3" stroke="#6b7180" stroke-width="2"/></svg>',
+ key:'<svg viewBox="0 0 120 80" fill="none"><rect x="12" y="14" width="34" height="50" stroke="#9aa0ac" stroke-width="2"/><rect x="54" y="26" width="54" height="30" stroke="#9aa0ac" stroke-width="2"/><rect x="62" y="34" width="20" height="14" fill="#2a0a0e"/></svg>',
+ reels:'<svg viewBox="0 0 120 80" fill="none"><rect x="22" y="10" width="34" height="60" rx="5" stroke="#D4AF37" stroke-width="2"/><rect x="64" y="10" width="34" height="60" rx="5" stroke="#9aa0ac" stroke-width="2"/><path d="M34 34l10 6-10 6z" fill="#D4AF37"/></svg>',
+ cut:'<svg viewBox="0 0 120 80" fill="none"><rect x="8" y="30" width="104" height="20" rx="3" stroke="#6b7180" stroke-width="2"/><rect x="30" y="30" width="22" height="20" fill="rgba(213,17,28,.35)" stroke="#d5111c" stroke-width="2"/><rect x="70" y="30" width="14" height="20" fill="rgba(213,17,28,.35)" stroke="#d5111c" stroke-width="2"/></svg>',
+ senti:'<svg viewBox="0 0 120 80" fill="none"><rect x="14" y="16" width="50" height="22" rx="8" stroke="#9aa0ac" stroke-width="2"/><rect x="56" y="44" width="50" height="22" rx="8" stroke="#d5111c" stroke-width="2"/></svg>',
+ mail:'<svg viewBox="0 0 120 80" fill="none"><rect x="20" y="16" width="80" height="48" rx="4" stroke="#9aa0ac" stroke-width="2"/><path d="M20 20l40 26 40-26" stroke="#d5111c" stroke-width="2"/></svg>',
+ ads:'<svg viewBox="0 0 120 80" fill="none"><rect x="10" y="14" width="30" height="52" rx="4" stroke="#9aa0ac" stroke-width="2"/><rect x="46" y="22" width="30" height="30" rx="4" stroke="#9aa0ac" stroke-width="2"/><rect x="82" y="28" width="30" height="18" rx="3" stroke="#d5111c" stroke-width="2"/></svg>'
+};
+var LOCK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>';
+
+var SHELVES=[
+ {stage:"Showcase",desc:"Give your film a home worth sharing.",tools:[
+  {id:"page",name:"Film page",desc:"A link-in-bio page for your film with trailer, clips and where to watch.",art:"page",status:"ext",href:"https://www.flmlnk.com",extLabel:"Free on FLMLNK"},
+  {id:"comps",name:"Comp finder",desc:"Find the five titles your film should be sold next to, and how they performed.",art:"comps",status:"soon"},
+  {id:"keyart",name:"Key art resizer",desc:"One poster, resized for every platform, festival and store listing.",art:"key",status:"soon"}]},
+ {stage:"Share",desc:"Turn what you have into posts people stop for.",tools:[
+  {id:"reels",name:"Event reels",desc:"Turn a screening flyer into reels with a ticket link.",art:"reels",status:"ext",href:"https://showlnk.com",extLabel:"Live on Showlnk"},
+  {id:"cutdown",name:"Trailer cutdown",desc:"Cut your trailer into 15 and 30 second vertical clips.",art:"cut",status:"soon"}]},
+ {stage:"Capture",desc:"Collect proof that audiences love your film.",tools:[
+  {id:"capture",name:"Festival reaction capture",desc:"Put a QR code on the screen after your screening. Audiences record a reaction on their phone, and you get videos to post for free.",art:"cap",status:"live"},
+  {id:"sentiment",name:"Audience sentiment scan",desc:"See what people say about films like yours, in their words.",art:"senti",status:"soon"}]},
+ {stage:"Nurture",desc:"Keep the people who showed up.",tools:[
+  {id:"fanmail",name:"Fan email sequences",desc:"Ready-to-send emails for premiere, release day and awards season.",art:"mail",status:"soon"}]},
+ {stage:"Convert",desc:"Know the numbers before you spend a dollar.",tools:[
+  {id:"tubi",name:"Tubi revenue calculator",desc:"See what your film can earn on Tubi in its first year, how many views it needs to break even, and what a campaign changes.",art:"calc",status:"live"},
+  {id:"adpack",name:"Ad packager",desc:"Your trailer and reactions, packaged into ads for Meta, YouTube and TikTok.",art:"ads",status:"soon"}]}
+];
+
+var FEAT=[
+ {id:"capture",title:"Festival reaction capture",sub:"A QR code after your screening turns the audience into free ads",art:"capture"},
+ {id:"tubi",title:"Tubi revenue calculator",sub:"Your film's first-year earnings and break-even, before you spend a dollar",art:"tubi"},
+ {id:"reels",title:"Event reels on Showlnk",sub:"Turn a screening flyer into reels with a ticket link",art:"reels",href:"https://showlnk.com"},
+ {id:"comps",title:"Comp finder",sub:"Coming soon: the five titles your film should be sold next to",art:"comps"}
+];
+function featArt(k){
+ var defs='<defs><radialGradient id="g_'+k+'" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#3a0a10"/><stop offset="1" stop-color="#07080a"/></radialGradient><linearGradient id="s_'+k+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#ffd9a0" stop-opacity=".75"/></linearGradient></defs>';
+ var bg='<rect width="320" height="180" fill="url(#g_'+k+')"/>';
+ if(k==="capture"){
+  var seats="";for(var r=0;r<3;r++)for(var i=0;i<12;i++){var x=8+i*27+(r%2?13:0),y=132+r*16;seats+='<path d="M'+x+' '+(y+16)+'v-9a10 10 0 0120 0v9z" fill="#050506" opacity="'+(0.85+r*0.05)+'"/><circle cx="'+(x+10)+'" cy="'+(y-4)+'" r="6.5" fill="#050506"/>'}
+  var qr="";var pat=[1,1,1,0,1,0,1,1,1, 1,0,1,1,0,0,1,0,1, 1,1,1,0,1,1,1,1,1, 0,1,0,1,1,0,0,1,0, 1,0,1,1,0,1,1,0,1, 0,1,1,0,1,0,0,1,1, 1,1,1,0,0,1,1,0,1, 1,0,1,1,1,0,1,1,0, 1,1,1,0,1,1,0,1,1];
+  pat.forEach(function(v,i){if(v)qr+='<rect x="'+(142+(i%9)*4)+'" y="'+(40+Math.floor(i/9)*4)+'" width="4" height="4" fill="#0a0a0a"/>'});
+  return '<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">'+defs+bg+'<path d="M40 22h240l-14 82H54z" fill="url(#s_'+k+')" opacity=".92"/><path d="M40 22h240l-14 82H54z" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="136" y="34" width="48" height="48" rx="3" fill="#fff"/>'+qr+'<text x="160" y="96" text-anchor="middle" font-family="Space Grotesk,Inter" font-weight="700" font-size="8" fill="#3a0a10">SCAN TO REACT</text><path d="M54 104L0 180h320l-54-76z" fill="#ffd9a0" opacity=".06"/>'+seats+'<g transform="translate(236 88) rotate(-8)"><rect width="46" height="86" rx="8" fill="#111" stroke="#2a2d35" stroke-width="2"/><rect x="5" y="10" width="36" height="52" rx="4" fill="#2b1a1d"/><circle cx="23" cy="30" r="8" fill="#d9b8a0"/><path d="M11 58c2-10 22-10 24 0z" fill="#d9b8a0"/><circle cx="23" cy="72" r="6" fill="#d5111c"/></g></svg>';
+ }
+ if(k==="tubi"){
+  var pts=[[20,150],[60,146],[100,138],[140,120],[180,108],[220,84],[260,62],[300,34]];
+  var d=pts.map(function(p,i){return(i?"L":"M")+p[0]+" "+p[1]}).join(" ");
+  var grid="";for(var g=0;g<6;g++)grid+='<line x1="20" x2="300" y1="'+(30+g*24)+'" y2="'+(30+g*24)+'" stroke="#fff" stroke-opacity=".05"/>';
+  return '<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">'+defs+bg+grid+'<path d="'+d+' L300 160 L20 160z" fill="#d5111c" opacity=".14"/><path d="'+d+'" fill="none" stroke="#ff2a37" stroke-width="3" stroke-linejoin="round"/><line x1="20" x2="300" y1="70" y2="70" stroke="#D4AF37" stroke-dasharray="6 5" stroke-width="1.6"/><text x="24" y="64" font-family="Inter" font-size="9" fill="#D4AF37">Break-even</text><circle cx="300" cy="34" r="5" fill="#ff2a37"/><circle cx="300" cy="34" r="11" fill="#ff2a37" opacity=".25"/><text x="24" y="36" font-family="DM Serif Display,Georgia" font-size="30" fill="#fff">'+(state.lastForecast!=null&&state.film?money(state.lastForecast):"$46K")+'</text><text x="24" y="50" font-family="Inter" font-size="9" fill="#9a9ea8">'+(state.film?esc(state.film)+", year one":"Gap to break even, sample film")+'</text></svg>';
+ }
+ if(k==="reels"){
+  var cols=[["#5b0f1a","#d5111c"],["#2b2310","#D4AF37"],["#1a1d24","#9a9ea8"]];
+  var ph=cols.map(function(c,i){var x=58+i*72,y=i===1?14:26;return '<g transform="translate('+x+' '+y+')"><rect width="60" height="'+(i===1?152:136)+'" rx="9" fill="#0c0d10" stroke="#2a2d35" stroke-width="2"/><rect x="5" y="6" width="50" height="'+(i===1?112:98)+'" rx="5" fill="'+c[0]+'"/><circle cx="30" cy="'+(i===1?50:44)+'" r="12" fill="'+c[1]+'" opacity=".8"/><path d="M26 '+(i===1?44:38)+'l11 6-11 6z" fill="#fff"/><rect x="10" y="'+(i===1?126:112)+'" width="40" height="12" rx="6" fill="#fff"/><text x="30" y="'+(i===1?135:121)+'" text-anchor="middle" font-family="Inter" font-weight="700" font-size="6.5" fill="#111">TICKETS</text></g>'}).join("");
+  return '<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">'+defs+bg+ph+'</svg>';
+ }
+ var posters=[["#1a1d24",54],["#3a0a10",0],["#1a1d24",54]].map(function(p,i){return '<g transform="translate('+(46+i*82)+' '+(30+(i===1?-8:6))+')"><rect width="64" height="'+(i===1?136:112)+'" rx="5" fill="'+p[0]+'" stroke="'+(i===1?"#d5111c":"#33363f")+'" stroke-width="2"/><rect x="8" y="'+(i===1?96:76)+'" width="48" height="5" rx="2" fill="#fff" opacity=".7"/><rect x="8" y="'+(i===1?106:86)+'" width="30" height="4" rx="2" fill="#fff" opacity=".35"/></g>'}).join("");
+ return '<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">'+defs+bg+posters+'</svg>';
+}
+function renderFeat(){
+ $("#feat").innerHTML=FEAT.map(function(f){
+  var inner='<div class="media">'+featArt(f.art)+'</div><h3>'+esc(f.title)+'</h3><p>'+esc(f.sub)+'</p>';
+  if(f.href)return '<a class="fcard" href="'+f.href+'" target="_blank" rel="noopener">'+inner+'</a>';
+  if(f.id==="comps")return '<button type="button" class="fcard" data-notify="comps">'+inner+'</button>';
+  return '<button type="button" class="fcard" data-open="'+f.id+'">'+inner+'</button>';
+ }).join("");
+}
+var QICON={
+ capture:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M9 16c1-2 5-2 6 0"/></svg>',
+ tubi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20l6-7 4 3 8-10"/><path d="M3 9h18" stroke-dasharray="2 2"/></svg>',
+ page:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>',
+ reels:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>',
+ comps:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="6" height="12" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="16" y="6" width="6" height="12" rx="1"/></svg>',
+ adpack:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="8" height="16" rx="1.5"/><rect x="12" y="4" width="10" height="9" rx="1.5"/><path d="M12 17h10"/></svg>',
+ cutdown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="8" width="20" height="8" rx="1"/><path d="M8 8v8M14 8v8"/></svg>',
+ sentiment:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h11v7H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-3"/></svg>',
+ fanmail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+ keyart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="12" rx="1"/><rect x="13" y="9" width="8" height="12" rx="1"/></svg>'
+};
+function allTools(){var a=[];SHELVES.forEach(function(s){s.tools.forEach(function(t){t.stage=s.stage;a.push(t)})});return a}
+function toolById(id){return allTools().filter(function(t){return t.id===id})[0]}
+function badgeFor(t){if(t.id==="capture")return '<span class="badge new">NEW</span>';if(t.status==="live")return '<span class="badge free">FREE</span>';if(t.status==="ext")return '<span class="badge ext">LIVE</span>';return '<span class="badge soon">SOON</span>'}
+function actAttrs(t){if(t.status==="live")return 'data-open="'+t.id+'"';if(t.status==="ext")return '';return 'data-notify="'+t.id+'"'}
+function renderQuick(){
+ var ids=["capture","tubi","page","reels","comps","adpack"];
+ $("#quick").innerHTML=ids.map(function(id){var t=toolById(id);var on=state.waitlist[id];
+  var sub=t.status==="soon"&&on?"You're on the list":t.desc;
+  var inner='<div class="top"><span class="ic">'+QICON[id]+'</span>'+badgeFor(t)+'</div><h3>'+esc(t.name)+'</h3><p>'+esc(sub)+'</p>';
+  if(t.status==="ext")return '<a class="qt" href="'+t.href+'" target="_blank" rel="noopener">'+inner+'</a>';
+  return '<button type="button" class="qt" '+actAttrs(t)+'>'+inner+'</button>';
+ }).join("");
+}
+var curTab="all";
+function renderStage(){
+ var stages=["all"].concat(SHELVES.map(function(s){return s.stage}));
+ $("#tabs").innerHTML=stages.map(function(s){return '<button type="button" data-tab="'+s+'" aria-pressed="'+(s===curTab)+'">'+(s==="all"?"All tools":s)+'</button>'}).join("");
+ var list=allTools().filter(function(t){return curTab==="all"||t.stage===curTab});
+ $("#grid").innerHTML=list.map(function(t){
+  var on=state.waitlist[t.id];
+  var cta=t.status==="live"?'<span class="btn btn-white btn-sm cta" aria-hidden="true">Open free</span>':t.status==="ext"?'<a class="btn btn-white btn-sm cta" href="'+t.href+'" target="_blank" rel="noopener">'+esc(t.extLabel)+'</a>':'<button type="button" class="btn btn-ghost btn-sm cta" data-notify="'+t.id+'"'+(on?" disabled":"")+'>'+(on?"You're on the list":"Notify me")+'</button>';
+  return '<article class="gcard">'+(t.status==="live"?'<button type="button" class="cover" data-open="'+t.id+'" aria-label="Open '+esc(t.name)+'"></button>':'')+'<div class="art">'+ICON[t.art]+'</div><div class="info"><div class="row1">'+badgeFor(t)+'<span class="stage">'+esc(t.stage)+'</span></div><h3>'+esc(t.name)+'</h3><p>'+esc(t.desc)+'</p>'+cta+'</div></article>';
+ }).join("");
+}
+function renderShelves(){renderFeat();renderQuick();renderStage()}
+document.addEventListener("click",function(e){
+ var tb=e.target.closest("[data-tab]");if(tb){curTab=tb.getAttribute("data-tab");renderStage();return}
+ var tj=e.target.closest("[data-tabjump]");if(tj){curTab=tj.getAttribute("data-tabjump");renderStage()}
+});
+$("#featPrev").addEventListener("click",function(){var f=$("#feat");f.scrollBy({left:-f.clientWidth*0.8,behavior:"smooth"})});
+$("#featNext").addEventListener("click",function(){var f=$("#feat");f.scrollBy({left:f.clientWidth*0.8,behavior:"smooth"})});
+$("#dropsBtn").addEventListener("click",function(){$("#feat").scrollTo({left:0,behavior:"smooth"});toast("New: festival reaction capture and the Tubi revenue calculator, both free.")});
+(function(){var s=$("#stars");if(!s)return;var h="",seed=7;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}for(var i=0;i<140;i++){h+='<circle cx="'+(rnd()*100).toFixed(2)+'%" cy="'+(rnd()*100).toFixed(2)+'%" r="'+(rnd()*1.2+.3).toFixed(2)+'" fill="#fff" opacity="'+(rnd()*.7+.15).toFixed(2)+'"/>'}s.setAttribute("width","100%");s.setAttribute("height","100%");s.innerHTML=h})();
+
+function renderDemand(){
+ var done=0,h="";
+ DEMAND.forEach(function(d){
+  var isDone=!!state.done[d.id];if(isDone)done++;
+  h+='<button type="button" class="chip '+(isDone?"done":"")+(d.paid?" locked":"")+'" data-demand="'+d.id+'">'+(d.paid&&!isDone?LOCK:"")+esc(d.label)+'</button>';
+ });
+ $("#demandChips").innerHTML=h;
+ $("#demandMeter").style.width=Math.round(done/DEMAND.length*100)+"%";
+ $("#demandSub").textContent=done===0?"Each tool adds proof that people want to watch "+filmName()+". That proof is what distributors buy.":done+" of "+DEMAND.length+" complete for "+filmName()+". Campaign proof and the distributor report unlock when FLMLNK runs your first campaign.";
+}
+
+function renderTiers(rec){
+ var h="";
+ TIERS.forEach(function(t){
+  h+='<div class="t '+(rec===t.id?"rec":"")+'"><b>'+t.name+'</b>'+(rec===t.id?' <span class="tag free" style="margin-left:6px">Fits your plan</span>':'')+'<div class="p">$'+t.price.toLocaleString()+'<small>/mo</small></div><ul><li>'+t.blurb+'</li><li>Ad budget up to '+(t.cap===Infinity?"unlimited":"$"+t.cap.toLocaleString()+"/mo")+'</li><li>'+t.take+'% take rate</li></ul></div>';
+ });
+ $("#tiers").innerHTML=h;
+}
+
+/* marquee */
+function buildBulbs(){
+ var b=$("#bulbs"),r=b.getBoundingClientRect(),gap=18,pts=[];
+ var w=r.width,ht=r.height;if(!w)return;
+ var nx=Math.floor(w/gap),ny=Math.floor(ht/gap);
+ for(var i=0;i<=nx;i++)pts.push([i/nx*100,0]);
+ for(var j=1;j<=ny;j++)pts.push([100,j/ny*100]);
+ for(i=nx-1;i>=0;i--)pts.push([i/nx*100,100]);
+ for(j=ny-1;j>0;j--)pts.push([0,j/ny*100]);
+ b.innerHTML=pts.map(function(p){return '<i style="left:'+p[0]+'%;top:'+p[1]+'%"></i>'}).join("");
+}
+function lightUp(instant){
+ var bulbs=document.querySelectorAll("#bulbs i");
+ var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+ if(instant||reduce){bulbs.forEach(function(x){x.classList.add("lit")});return}
+ bulbs.forEach(function(x){x.classList.remove("lit")});
+ bulbs.forEach(function(x,i){setTimeout(function(){x.classList.add("lit")},i*14)});
+}
+function setFilm(name,animate){
+ state.film=name.trim().slice(0,60);save();
+ var t=$("#marqueeTitle");t.textContent=state.film||"Your film";t.classList.toggle("empty",!state.film);
+ $("#filmChip").classList.toggle("on",!!state.film);$("#filmChipName").textContent=state.film;
+ renderDemand();renderShelves();
+ if(animate)lightUp(false);
+}
+$("#filmForm").addEventListener("submit",function(e){e.preventDefault();var v=$("#filmInput").value;if(!v.trim())return;setFilm(v,true);track("film_set");toast(state.film+" is on the marquee. Pick a tool to start.");setTimeout(function(){document.getElementById("quick").scrollIntoView({behavior:"smooth",block:"start"})},900)});
+$("#filmInput").addEventListener("input",function(e){var v=e.target.value.trim();var t=$("#marqueeTitle");t.textContent=v||state.film||"Your film";t.classList.toggle("empty",!v&&!state.film)});
+
+/* shelves events */
+document.addEventListener("click",function(e){
+ var o=e.target.closest("[data-open]");if(o){openTool(o.getAttribute("data-open"));return}
+ var n=e.target.closest("[data-notify]");if(n){notify(n.getAttribute("data-notify"));return}
+ var d=e.target.closest("[data-demand]");if(d){var item=DEMAND.filter(function(x){return x.id===d.getAttribute("data-demand")})[0];
+  if(item.tool==="tubi"||item.tool==="capture")openTool(item.tool);
+  else if(item.paid){document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}
+  else notify(item.tool);}
+});
+var askCb=null;
+function askEmail(title,body,ok,cb){$("#askTitle").textContent=title;$("#askBody").textContent=body;$("#askOk").textContent=ok;$("#askEmail").value=state.email||"";askCb=cb;$("#askDlg").classList.add("open");setTimeout(function(){$("#askEmail").focus()},30)}
+function closeAsk(){$("#askDlg").classList.remove("open");askCb=null}
+$("#askForm").addEventListener("submit",function(e){e.preventDefault();var v=$("#askEmail").value.trim();if(!/^\S+@\S+\.\S+$/.test(v))return;var cb=askCb;closeAsk();if(cb)cb(v)});
+$("#askCancel").addEventListener("click",closeAsk);
+$("#askDlg").addEventListener("click",function(e){if(e.target===$("#askDlg"))closeAsk()});
+function notify(id){
+ if(!state.email){var nm="";SHELVES.forEach(function(s){s.tools.forEach(function(t){if(t.id===id)nm=t.name})});askEmail("Get "+(nm||"this tool")+" first","We'll email you the day it opens. Waitlist demand decides what we build next.","Notify me",function(em){captureLead(em,"waitlist:"+id,{});notify(id)});return}
+ if(state.leads.some(function(l){return l.email===state.email}))captureLead(state.email,"waitlist:"+id,{});
+ state.waitlist[id]=true;save();track("waitlist",{tool:id});renderShelves();toast("You're on the list. We'll email "+state.email+" when it opens.");
+}
+
+function captureLead(email,source,meta){
+ state.email=email;
+ var lead=state.leads.filter(function(l){return l.email===email})[0];
+ if(!lead){lead={email:email,film:state.film,first:source,sources:[],score:0,meta:{},at:Date.now()};state.leads.push(lead)}
+ if(lead.sources.indexOf(source)<0)lead.sources.push(source);
+ for(var k in meta)lead.meta[k]=meta[k];
+ lead.film=state.film||lead.film;
+ lead.score=scoreLead(lead);save();track("lead",{source:source});
+}
+function scoreLead(l){
+ var s=10;var m=l.meta;
+ if(m.budget>=100000)s+=25;else if(m.budget>=25000)s+=15;
+ if(m.gap>0)s+=Math.min(25,Math.round(m.gap/4000));
+ if(m.monthlySpend>=500)s+=15;
+ if(l.sources.some(function(x){return x.indexOf("capture")===0}))s+=15;
+ if(l.sources.length>1)s+=10;
+ if(m.tierInterest)s+=20;
+ return Math.min(100,s);
+}
+
+/* workspace */
+var ws=$("#ws"),lastFocus=null;
+function openTool(id){
+ lastFocus=document.activeElement;
+ ws.classList.add("open");document.body.style.overflow="hidden";
+ if(id==="tubi")renderTubi();else if(id==="capture")renderCapture();else if(id==="admin")renderAdmin();
+ track("tool_open",{tool:id});
+ setTimeout(function(){var f=ws.querySelector("input,select,button:not(#wsClose)");(f||$("#wsClose")).focus()},50);
+}
+function closeTool(){stopCam();ws.classList.remove("open");document.body.style.overflow="";if(lastFocus)lastFocus.focus();renderShelves()}
+$("#wsClose").addEventListener("click",closeTool);
+ws.addEventListener("click",function(e){if(e.target===ws)closeTool()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){if($("#askDlg").classList.contains("open"))closeAsk();else if(ws.classList.contains("open"))closeTool()}});
+$("#adminBtn").addEventListener("click",function(){openTool("admin")});
+
+/* ---------- Tubi calculator ---------- */
+var calc={budget:50000,runtime:90,organic:1500,spend:500,months:4,audience:"cold",completion:55,adsPerHour:12,ecpm:4.73,roasCold:2.5,roasWarm:5};
+if(state.calc)for(var ck in state.calc)calc[ck]=state.calc[ck];
+function compute(){
+ var perView=(calc.runtime/60)*(calc.completion/100)*calc.adsPerHour*(calc.ecpm/1000);
+ var organicYear=calc.organic*12*perView;
+ var roas=calc.audience==="warm"?calc.roasWarm:calc.roasCold;
+ var spendTotal=calc.spend*calc.months;
+ var campaignRev=spendTotal*roas;
+ var total=organicYear+campaignRev;
+ var net=total-spendTotal;
+ var gap=calc.budget-net;
+ var beViews=perView>0?Math.ceil(calc.budget/perView):0;
+ var spendToBE=gap>0&&roas>1?gap/(roas-1):0;
+ var monthly=[];var cum=0,cumNoAds=0;
+ for(var m=1;m<=12;m++){cumNoAds+=calc.organic*perView;cum+=calc.organic*perView+(m<=calc.months?calc.spend*roas:0)-(m<=calc.months?calc.spend:0);monthly.push([cumNoAds,cum])}
+ return{perView:perView,organicYear:organicYear,roas:roas,spendTotal:spendTotal,campaignRev:campaignRev,total:total,net:net,gap:gap,beViews:beViews,spendToBE:spendToBE,monthly:monthly};
+}
+function field(id,label,val,hint,attrs){return '<div class="field"><label for="c_'+id+'">'+label+'</label><input id="c_'+id+'" data-k="'+id+'" type="number" inputmode="decimal" value="'+val+'" '+(attrs||'min="0"')+'>'+(hint?'<span class="hint">'+hint+'</span>':'')+'</div>'}
+function renderTubi(){
+ $("#wsTitle").textContent="Tubi revenue calculator";
+ $("#wsMain").innerHTML=
+ '<p style="color:var(--muted);max-width:62ch">An honest first-year forecast for '+esc(filmName())+' on Tubi. Tubi title contracts run 12 months, so this forecast covers one year.</p>'+
+ '<div class="fields" style="margin-top:22px">'+
+ field("budget","What did the film cost to make? ($)",calc.budget,"This is your break-even line.")+
+ field("runtime","Runtime (minutes)",calc.runtime,"",'min="1" max="300"')+
+ field("organic","Views per month with no promotion",calc.organic,"Most indie titles land between 500 and 5,000.")+
+ '<div class="field"><label>Who already knows the film?</label><div class="seg" role="group" aria-label="Audience"><button type="button" data-aud="cold" aria-pressed="'+(calc.audience==="cold")+'">Nobody yet</button><button type="button" data-aud="warm" aria-pressed="'+(calc.audience==="warm")+'">We have fans</button></div><span class="hint">A warm audience (followers, an email list, festival buzz) converts ads into views at a higher rate.</span></div>'+
+ field("spend","Monthly ad budget ($)",calc.spend,"Set it to 0 to see the forecast with no campaign.")+
+ field("months","Months of ads",calc.months,"",'min="0" max="12"')+
+ '</div>'+
+ '<details class="assume"><summary>Assumptions you can change</summary><div class="fields">'+
+ field("completion","Average watch-through (%)",calc.completion,"",'min="1" max="100"')+
+ field("adsPerHour","Ads per hour watched",calc.adsPerHour,"Roughly 12 thirty-second spots.")+
+ field("ecpm","Partner revenue per 1,000 ad views ($)",calc.ecpm,"$4.73 from FLMLNK's Shots campaign on Tubi.",'min="0" step="0.01"')+
+ field("roasCold","Return per $1 of ads, cold audience",calc.roasCold,"FLMLNK pilots have returned 2 to 10 times ad spend.",'min="0" step="0.1"')+
+ field("roasWarm","Return per $1 of ads, warm audience",calc.roasWarm,"Shots returned 7.3 times ($1,500 in, about $11K back).",'min="0" step="0.1"')+
+ '</div></details>'+
+ '<div id="calcOut"></div>';
+ $("#wsMain").querySelectorAll("input[data-k]").forEach(function(inp){inp.addEventListener("input",function(){var v=parseFloat(inp.value);calc[inp.getAttribute("data-k")]=isFinite(v)&&v>=0?v:0;state.calc=calc;save();updateTubi()})});
+ $("#wsMain").querySelectorAll("[data-aud]").forEach(function(b){b.addEventListener("click",function(){calc.audience=b.getAttribute("data-aud");$("#wsMain").querySelectorAll("[data-aud]").forEach(function(x){x.setAttribute("aria-pressed",x===b)});state.calc=calc;save();updateTubi()})});
+ updateTubi();
+}
+function updateTubi(){
+ var r=compute();
+ state.lastForecast=r.net;state.done.forecast=true;save();renderDemand();
+ var unlocked=!!(state.email&&state.leads.some(function(l){return l.email===state.email&&l.sources.indexOf("tubi")>=0}));
+ var beFill=calc.budget>0?Math.min(100,Math.max(0,r.net/calc.budget*100)):100;
+ var verdict;
+ if(r.gap<=0)verdict=esc(filmName())+" earns back its budget in year one on this plan, with <em>"+money(-r.gap)+"</em> left over. The next move is scaling what works.";
+ else if(calc.spend===0)verdict="With no promotion, "+esc(filmName())+" covers <em>"+Math.round(beFill)+"%</em> of its budget in year one. Films rarely find an audience on Tubi without a push.";
+ else verdict="On this plan, "+esc(filmName())+" covers <em>"+Math.round(beFill)+"%</em> of its budget in year one. The gap is <em>"+money(r.gap)+"</em>. That's the honest number, and it's the one a campaign is built to close.";
+ var html=
+ '<div class="results">'+
+  '<div class="stat '+(r.gap<=0?"good":"")+'"><div class="k">First-year earnings after ad spend</div><div class="v">'+money(r.net)+'</div><div class="s">'+money(r.organicYear)+' from organic views, '+money(r.campaignRev-r.spendTotal)+' net from ads</div></div>'+
+  '<div class="stat"><div class="k">Views needed to break even</div><div class="v">'+num(r.beViews)+'</div><div class="s">About '+(r.perView*100).toFixed(1)+'¢ per view at '+calc.runtime+' minutes</div></div>'+
+  '<div class="stat '+(r.gap>0?"bad":"good")+'"><div class="k">'+(r.gap>0?"Gap to break even":"Profit over budget")+'</div><div class="v">'+money(Math.abs(r.gap))+'</div><div class="s">Against a '+money(calc.budget)+' budget</div></div>'+
+ '</div><p class="verdict">'+verdict+'</p>';
+ var detail=
+ '<div class="chart"><h4>Cumulative earnings over the 12-month contract</h4>'+chartSVG(r)+'<div class="legend"><span style="--c:#6b7180">No promotion</span><span style="--c:#d5111c">With your campaign</span><span style="--c:#D4AF37">Break-even ('+money(calc.budget)+')</span></div></div>'+
+ '<div class="plan">'+planSteps(r)+'</div>';
+ if(unlocked){html+=detail}
+ else{
+  html+='<div class="gate"><h3>Get the month-by-month forecast and a plan to close the gap</h3><p>We\'ll show the 12-month earnings curve for '+esc(filmName())+' and the ad budget it would take to break even, and email you a copy to share with your team or investors.</p>'+
+  '<form id="tubiGate"><label class="sr" for="tubiEmail">Email</label><input id="tubiEmail" type="email" required placeholder="you@yourfilm.com" value="'+esc(state.email)+'"><button class="btn btn-red" type="submit">Show my full forecast</button></form><p class="fine">Free. One email with your forecast, then occasional tips. Unsubscribe anytime.</p></div>'+
+  '<div class="blurred" aria-hidden="true">'+detail+'</div>';
+ }
+ $("#calcOut").innerHTML=html;
+ var g=$("#tubiGate");
+ if(g)g.addEventListener("submit",function(e){e.preventDefault();var em=$("#tubiEmail").value.trim();if(!/^\S+@\S+\.\S+$/.test(em))return;captureLead(em,"tubi",{budget:calc.budget,gap:Math.max(0,r.gap),monthlySpend:calc.spend});toast("Full forecast unlocked. A copy is on its way to "+em+".");updateTubi()});
+ renderTubiSide(r);
+}
+function planSteps(r){
+ var roasTxt=r.roas+"x";
+ var steps=[];
+ if(r.gap>0&&r.roas>1){
+  var months=Math.max(1,calc.months||4);var perMonth=Math.ceil(r.spendToBE/months/50)*50;
+  steps.push('<strong>Budget to break even:</strong> <span>about '+money(r.spendToBE)+' more in ads over the contract year ('+money(perMonth)+'/mo for '+months+' months), assuming a '+roasTxt+' return.</span>');
+ }else if(r.gap>0){steps.push('<strong>Raise the return first.</strong> <span>At '+roasTxt+' per dollar, more ad spend won\'t close the gap. Warm the audience with reactions and a film page before you buy reach.</span>')}
+ steps.push('<strong>Warm the audience before launch.</strong> <span>Post festival reactions and clips so ads land on people who have seen the film talked about. In FLMLNK pilots, warm audiences return roughly twice as much per dollar.</span>');
+ steps.push('<strong>Test small, then scale.</strong> <span>Run one creative per week, keep the one with the lowest cost per qualified viewer, and move budget to it.</span>');
+ return steps.map(function(s,i){return '<div class="step"><b>'+(i+1)+'</b><div>'+s+'</div></div>'}).join("");
+}
+function chartSVG(r){
+ var W=640,H=220,P=34;var max=Math.max(calc.budget,r.monthly[11][0],r.monthly[11][1],1)*1.08;var min=Math.min(0,r.monthly.reduce(function(a,m){return Math.min(a,m[1])},0));
+ function x(i){return P+i*(W-P-10)/11}function y(v){return H-24-(v-min)/(max-min)*(H-40)}
+ function path(idx){return r.monthly.map(function(m,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(m[idx]).toFixed(1)}).join(" ")}
+ var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Cumulative earnings chart"><line x1="'+P+'" x2="'+(W-10)+'" y1="'+y(calc.budget)+'" y2="'+y(calc.budget)+'" stroke="#D4AF37" stroke-dasharray="5 5"/>';
+ if(min<0)s+='<line x1="'+P+'" x2="'+(W-10)+'" y1="'+y(0)+'" y2="'+y(0)+'" stroke="#232838"/>';
+ s+='<path d="'+path(0)+'" fill="none" stroke="#6b7180" stroke-width="2"/><path d="'+path(1)+'" fill="none" stroke="#d5111c" stroke-width="2.5"/>';
+ for(var i=0;i<12;i+=1)if(i%2===0||i===11)s+='<text x="'+x(i)+'" y="'+(H-6)+'" fill="#6b7180" font-size="11" text-anchor="middle">M'+(i+1)+'</text>';
+ s+='<text x="'+(P-4)+'" y="'+(y(calc.budget)-6)+'" fill="#D4AF37" font-size="11">'+money(calc.budget)+'</text></svg>';
+ return s;
+}
+function renderTubiSide(r){
+ var needMonthly=r.gap>0&&r.roas>1?Math.ceil(r.spendToBE/Math.max(1,calc.months||4)/50)*50:0;
+ var t=tierForSpend(Math.max(calc.spend,1));if(t.id==="free")t=TIERS[1];
+ var capTxt=t.cap===Infinity?"any budget":money(t.cap)+"/mo";
+ state.tier=t.id;save();renderTiers(t.id);
+ var head=r.gap>0?"Close the "+money(r.gap)+" gap":"Scale what's working";
+ $("#wsSide").innerHTML=
+ '<h3>'+head+'</h3><p>FLMLNK builds and runs the campaign for '+esc(filmName())+': creative from your trailer and reactions, targeting from films like yours, and weekly reporting tied to Tubi views.'+(needMonthly>calc.spend?' Breaking even takes about '+money(needMonthly)+'/mo at today\'s return. Start at your budget, prove the return, then scale.':'')+'</p>'+
+ '<div class="tier"><div class="name"><b>'+t.name+'</b><span>$'+t.price.toLocaleString()+'<small style="font-family:var(--sans);font-size:13px;color:var(--muted)">/mo</small></span></div><ul><li>Fits your '+money(calc.spend)+'/mo plan'+(t.cap>calc.spend?', with room up to '+capTxt:'')+'</li><li>Campaign built from your film\'s assets</li><li>Proof of demand you can show distributors</li></ul><button class="btn btn-red" type="button" id="tierCta">Start '+t.name+'</button></div>'+
+ '<div class="locked-list">'+
+ '<div class="locked-item">'+LOCK+'<div><b>Live campaign tracking</b>Cost per qualified viewer and actual Tubi lift, updated weekly.</div></div>'+
+ '<div class="locked-item">'+LOCK+'<div><b>Distributor-ready report</b>Turn your campaign results into proof a distributor can underwrite.</div></div></div>'+
+ '<p style="font-size:12.5px;color:var(--dim);margin-top:16px">Forecasts are estimates based on the assumptions above and FLMLNK campaign data. Actual Tubi earnings depend on the platform, the season and your film.</p>';
+ $("#tierCta").addEventListener("click",function(){upsellClick(t,"tubi",calc.spend)});
+}
+function upsellClick(t,src,spend){
+ var em=state.email;
+ if(!em){askEmail("Start "+t.name,"A campaign strategist will reach out within one business day to set up "+filmName()+".","Start "+t.name,function(v){state.email=v;upsellClick(t,src,spend)});return}
+ captureLead(em,src,{tierInterest:t.id,monthlySpend:spend||0});
+ track("upsell_click",{tier:t.id,from:src});
+ toast("Thanks. A campaign strategist will reach out to "+em+" within one business day.");
+}
+
+/* ---------- Reaction capture ---------- */
+var cap={event:"",date:"",prompt:"What did you feel when the credits rolled?",limit:25,created:!!state.capCreated};
+if(state.cap)for(var kk in state.cap)cap[kk]=state.cap[kk];
+var reactions=[];var stream=null,recorder=null;
+function renderCapture(){
+ $("#wsTitle").textContent="Festival reaction capture";
+ var setup=
+ '<p style="color:var(--muted);max-width:62ch">Put a QR code on screen after your screening. Audience members scan it, record a short reaction on their phone and agree to let you share it. You get vertical videos to post for free.</p>'+
+ '<div class="fields" style="margin-top:22px">'+
+ '<div class="field"><label for="k_film">Film</label><input id="k_film" value="'+esc(state.film)+'" placeholder="Film title" maxlength="60"></div>'+
+ '<div class="field"><label for="k_event">Screening or festival</label><input id="k_event" value="'+esc(cap.event)+'" placeholder="e.g. Freep Film Festival, Saturday 7pm" maxlength="80"></div>'+
+ '<div class="field full"><label for="k_prompt">The question audiences answer</label><input id="k_prompt" value="'+esc(cap.prompt)+'" maxlength="90"><span class="hint">Short and emotional works best. Reactions are capped at 30 seconds.</span></div>'+
+ '</div>';
+ var body=setup;
+ if(!cap.created){
+  body+='<div class="gate"><h3>Create your capture page</h3><p>We\'ll make a QR code for this screening and a page where your audience records. Free for up to 25 reactions per screening.</p><form id="capGate"><label class="sr" for="capEmail">Email</label><input id="capEmail" type="email" required placeholder="you@yourfilm.com" value="'+esc(state.email)+'"><button class="btn btn-red" type="submit">Create capture page</button></form><p class="fine">We send new reactions to this email. Audiences need no app and no account.</p></div>';
+ }else{
+  body+='<div class="qr-card"><div class="qr-box" id="qrBox"></div><div><h4>'+esc(cap.event||"Your screening")+'</h4><p>Show this on screen when the credits roll, or print it for the lobby. Audiences don\'t need an app.</p><div class="acts"><button class="btn btn-ghost btn-sm" type="button" id="dlQr">Show full screen</button><button class="btn btn-ghost btn-sm" type="button" id="copyLink">Copy capture link</button></div><p style="font-size:12px;color:var(--dim);margin-top:10px" id="capUrl"></p></div></div>';
+ }
+ body+='<div class="wall"><div class="wall-head"><h4>Reactions</h4><span id="capCount"></span></div><div class="cap-bar"><b id="capBar"></b></div><div class="reacts" id="reacts"></div></div>';
+ $("#wsMain").innerHTML='<div class="cap-grid"><div>'+body+'</div><div><p style="font-size:13px;color:var(--muted);margin-bottom:10px;text-align:center">What your audience sees</p>'+phoneHTML()+'</div></div>';
+ ["film","event","prompt"].forEach(function(f){var el=$("#k_"+f);el.addEventListener("input",function(){if(f==="film"){setFilm(el.value,false)}else{cap[f]=el.value;state.cap=cap;save()}refreshPhone()})});
+ var g=$("#capGate");
+ if(g)g.addEventListener("submit",function(e){e.preventDefault();var em=$("#capEmail").value.trim();if(!/^\S+@\S+\.\S+$/.test(em))return;if(!state.film){toast("Add your film's title first.");$("#k_film").focus();return}captureLead(em,"capture",{});cap.created=true;state.capCreated=true;state.cap=cap;save();toast("Capture page created for "+state.film+".");renderCapture()});
+ if(cap.created)drawQR();
+ wirePhone();renderWall();renderCaptureSide();
+}
+function capLink(){var slug=(state.film||"film").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40);return "https://flmlnk.com/r/"+(slug||"film")}
+function drawQR(){
+ if(typeof qrcode!=="function"){$("#qrBox").textContent="QR unavailable";return}
+ var q=qrcode(0,"M");q.addData(capLink());q.make();
+ var n=q.getModuleCount(),s=8,m=2,c=document.createElement("canvas");c.width=c.height=(n+m*2)*s;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.fillStyle="#0b0d10";
+ for(var r=0;r<n;r++)for(var cc=0;cc<n;cc++)if(q.isDark(r,cc))x.fillRect((cc+m)*s,(r+m)*s,s,s);
+ c.setAttribute("role","img");c.setAttribute("aria-label","QR code for the capture page");
+ $("#qrBox").innerHTML="";$("#qrBox").appendChild(c);
+ $("#capUrl").textContent=capLink()+" (prototype link)";
+ $("#dlQr").onclick=function(){var box=$("#qrBox");track("qr_present");try{var p=box.requestFullscreen?box.requestFullscreen():null;if(p&&p.catch)p.catch(function(){toast("Full screen isn't allowed here. Right-click the code to save it.")});else if(!p)toast("Full screen isn't allowed here. Right-click the code to save it.")}catch(e){toast("Full screen isn't allowed here. Right-click the code to save it.")}};
+ $("#copyLink").onclick=function(){try{navigator.clipboard.writeText(capLink()).then(function(){toast("Capture link copied.")},function(){toast(capLink())})}catch(e){toast(capLink())}};
+}
+function phoneHTML(){
+ return '<div class="phone"><div class="scr"><div style="font-size:11px;color:#cdb58a">You just watched</div><h5 id="phFilm">'+esc(state.film||"Your film")+'</h5><div class="q" id="phQ">'+esc(cap.prompt)+'</div>'+
+ '<div class="cam" id="phCam"><span id="phHint">Tap record. You have 30 seconds.</span><div class="rec" id="phRec"><i></i><span id="phTime">0:00</span></div></div>'+
+ '<label class="consent"><input type="checkbox" id="phConsent"> I agree that the filmmakers can share my reaction to promote the film.</label>'+
+ '<button class="btn btn-red" type="button" id="phBtn" style="width:100%">Record my reaction</button><div class="brandline">Captured with FLMLNK</div></div></div>';
+}
+function refreshPhone(){var a=$("#phFilm"),b=$("#phQ");if(a)a.textContent=state.film||"Your film";if(b)b.textContent=cap.prompt}
+function wirePhone(){
+ var btn=$("#phBtn");
+ btn.addEventListener("click",function(){
+  if(recorder&&recorder.state==="recording"){recorder.stop();return}
+  if(!$("#phConsent").checked){toast("Check the consent box first. Every reaction needs it.");$("#phConsent").focus();return}
+  if(reactions.length>=cap.limit){toast("This screening reached the free limit of 25 reactions.");return}
+  startRecording();
+ });
+}
+function startRecording(){
+ var btn=$("#phBtn");
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder==="undefined"){addSample();return}
+ navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:true}).then(function(s){
+  stream=s;var v=document.createElement("video");v.muted=true;v.playsInline=true;v.autoplay=true;v.srcObject=s;$("#phCam").appendChild(v);$("#phHint").style.display="none";
+  var chunks=[];try{recorder=new MediaRecorder(s)}catch(e){stopCam();addSample();return}
+  recorder.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
+  recorder.onstop=function(){var blob=new Blob(chunks,{type:recorder.mimeType||"video/webm"});reactions.push({url:URL.createObjectURL(blob),who:"Audience member "+(reactions.length+1)});onNewReaction();stopCam();btn.textContent="Record my reaction";$("#phRec").classList.remove("on");$("#phHint").style.display="";$("#phHint").textContent="Thanks. Your reaction was sent to the filmmakers."};
+  recorder.start();btn.textContent="Stop and send";$("#phRec").classList.add("on");
+  var t0=Date.now();var tick=setInterval(function(){if(!recorder||recorder.state!=="recording"){clearInterval(tick);return}var sec=Math.floor((Date.now()-t0)/1000);$("#phTime").textContent="0:"+String(sec).padStart(2,"0");if(sec>=30){recorder.stop();clearInterval(tick)}},250);
+ }).catch(function(){toast("Camera isn't available here, so we added a sample reaction.");addSample()});
+}
+function stopCam(){if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null}var v=document.querySelector("#phCam video");if(v)v.remove()}
+function addSample(){reactions.push({url:null,who:"Sample reaction "+(reactions.length+1)});onNewReaction()}
+function onNewReaction(){state.reactCount=(state.reactCount||0)+1;state.done.reactions=true;save();renderDemand();track("reaction");renderWall();renderCaptureSide()}
+function renderWall(){
+ var n=reactions.length;$("#capCount").textContent=n+" of "+cap.limit+" free reactions";$("#capBar").style.width=Math.min(100,n/cap.limit*100)+"%";
+ var h=reactions.map(function(r){return '<div class="react">'+(r.url?'<video src="'+r.url+'" controls playsinline></video>':'<div style="position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#2b1a1d,#0f1219)">'+ICON.cap.replace('<svg','<svg style="width:70%"')+'</div>')+'<div class="who">'+esc(r.who)+'</div></div>'}).join("");
+ if(n<3)for(var i=n;i<3;i++)h+='<div class="react empty">'+(i===0?"Reactions appear here as audiences record them. Try it on the phone.":"Waiting for a reaction")+'</div>';
+ $("#reacts").innerHTML=h;
+}
+function renderCaptureSide(){
+ var n=reactions.length;var t=TIERS[1];
+ var head=n===0?"Reactions are free. The reel is the payoff.":n+" reaction"+(n>1?"s":"")+" in. Now make them work.";
+ $("#wsSide").innerHTML=
+ '<h3>'+head+'</h3><p>Raw reactions are proof. A cut reel running as an ad is reach. Starter turns this screening into posts and your first campaign.</p>'+
+ '<div class="tier"><div class="name"><b>'+t.name+'</b><span>$'+t.price+'<small style="font-family:var(--sans);font-size:13px;color:var(--muted)">/mo</small></span></div><ul><li>Unlimited reactions per screening</li><li>Auto-cut highlight reel with captions</li><li>Best reactions run as ads, up to $500/mo</li></ul><button class="btn btn-red" type="button" id="tierCta">Make my reaction reel</button></div>'+
+ '<div class="locked-list"><div class="locked-item">'+LOCK+'<div><b>Highlight reel</b>Your best 30 seconds of reactions, cut and captioned for Reels, TikTok and Shorts.</div></div>'+
+ '<div class="locked-item">'+LOCK+'<div><b>Boost the best reaction</b>Run your strongest reaction as an ad to people who like films like yours.</div></div>'+
+ '<div class="locked-item">'+LOCK+'<div><b>Remove "Captured with FLMLNK"</b>Show only your film\'s branding on the capture page.</div></div></div>';
+ $("#tierCta").addEventListener("click",function(){upsellClick(t,"capture",0)});
+}
+
+/* ---------- internal demand dashboard ---------- */
+function renderAdmin(){
+ $("#wsTitle").textContent="Demand dashboard";
+ var leads=state.leads.slice().sort(function(a,b){return b.score-a.score});
+ var rows=leads.length?leads.map(function(l){var heat=l.score>=60?"hot":l.score>=35?"warm":"";return '<tr><td>'+esc(l.email)+'</td><td>'+esc(l.film||"—")+'</td><td>'+esc(l.sources.join(", "))+'</td><td>'+(l.meta.gap?money(l.meta.gap):"—")+'</td><td>'+(l.meta.tierInterest?esc(l.meta.tierInterest):"—")+'</td><td><span class="heat '+heat+'">'+l.score+'</span></td></tr>'}).join(""):'<tr><td colspan="6" style="color:var(--dim)">No leads yet. Use a tool and enter an email to see one appear.</td></tr>';
+ var allTools=[];SHELVES.forEach(function(s){s.tools.forEach(function(t){if(t.status==="soon")allTools.push(t)})});
+ var bars=allTools.map(function(t){var c=state.waitlist[t.id]?1:0;return '<div><span>'+esc(t.name)+'</span><i style="width:'+Math.max(2,c*100)+'%;opacity:'+(c?1:.25)+'"></i><span>'+c+'</span></div>'}).join("");
+ var ev={};state.events.forEach(function(e){ev[e.type]=(ev[e.type]||0)+1});
+ var opens=ev.tool_open||0,lead=state.leads.length,ups=ev.upsell_click||0;
+ $("#wsMain").innerHTML='<div class="adm">'+
+ '<h3>Funnel</h3><p class="note">Studio activity in this browser. In production this comes from the event log across all filmmakers.</p>'+
+ '<div class="results"><div class="stat"><div class="k">Tool opens</div><div class="v">'+opens+'</div></div><div class="stat"><div class="k">Leads captured</div><div class="v">'+lead+'</div></div><div class="stat"><div class="k">Plan clicks</div><div class="v">'+ups+'</div></div></div>'+
+ '<h3>Leads, ranked by intent</h3><p class="note">The score weighs budget size, the gap the calculator showed, planned ad spend, use of more than one tool and plan clicks. Leads scoring 60 or more go to a strategist the same day.</p>'+
+ '<div style="overflow:auto"><table><thead><tr><th>Email</th><th>Film</th><th>Came from</th><th>Gap shown</th><th>Plan clicked</th><th>Score</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+ '<h3>What to build next</h3><p class="note">Waitlist sign-ups for each tool that is coming soon. Build the tool with the most demand first.</p><div class="bars">'+bars+'</div></div>';
+ $("#wsSide").innerHTML='<h3>How the engine works</h3><p>Every tool is free and gives a real answer before asking for anything. The email unlocks the deeper result. The result itself recommends the plan, based on the filmmaker\'s own numbers.</p><p>Shared outputs carry "Captured with FLMLNK", so every reaction posted brings in the next filmmaker.</p>'+
+ '<button class="btn btn-ghost btn-sm" type="button" id="resetBtn" style="margin-top:18px">Reset prototype data</button>';
+ $("#resetBtn").addEventListener("click",function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()});
+}
+
+/* init */
+buildBulbs();
+setFilm(state.film||"",false);
+if(state.film)$("#filmInput").value=state.film;
+renderTiers(state.tier);
+lightUp(!!state.film);
+var rt;window.addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){buildBulbs();lightUp(true)},150)});
+})();
+</script>
+</body>
+</html>
